@@ -1,11 +1,16 @@
-const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'];
-const containerCount = 4;
-const liquidCount = 3;
+const colorPalettes = {
+    default: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'],
+    pastel: ['#FFB3B3', '#B3FFB3', '#B3B3FF', '#FFFFB3'],
+    vibrant: ['#FF007F', '#00FF7F', '#007FFF', '#FFFF00']
+};
 
-const gameContainer = document.getElementById('game-container');
-const containers = [];
-const history = [];
+let colors = colorPalettes.default;
+let moveLimit = 20;
 let moveCounter = 0;
+let timer;
+let timeElapsed = 0;
+const history = [];
+const containers = [];
 
 function createContainer(index) {
     const container = document.createElement('div');
@@ -23,12 +28,24 @@ function createContainer(index) {
 }
 
 function setupGame() {
+    gameContainer.innerHTML = '';
+    containers.length = 0;
+    history.length = [];
+    moveCounter = 0;
+    updateMoveCounter();
+    setupContainers();
+    startTimer();
+}
+
+function setupContainers() {
+    const difficulty = parseInt(document.getElementById('difficulty-select').value);
+    const containerCount = difficulty * 2;
+    
     for (let i = 0; i < containerCount; i++) {
         const container = createContainer(i);
         gameContainer.appendChild(container);
         containers.push(container);
     }
-    updateMoveCounter();
 }
 
 function handleContainerClick(event) {
@@ -55,6 +72,11 @@ function getTopLiquid(container) {
 }
 
 function moveLiquid(source, target) {
+    if (moveCounter >= moveLimit) {
+        alert('Move limit reached!');
+        return;
+    }
+    
     const liquid = getTopLiquid(source);
     if (liquid && target.children.length < liquidCount) {
         history.push({ source: source.dataset.index, target: target.dataset.index, liquid: liquid.style.backgroundColor });
@@ -79,6 +101,7 @@ function checkWinCondition() {
     for (const container of containers) {
         const colors = Array.from(container.querySelectorAll('div')).map(div => div.style.backgroundColor);
         if (colors.every(color => color === colors[0])) {
+            stopTimer();
             setTimeout(() => alert('You Win!'), 100);
             break;
         }
@@ -87,13 +110,21 @@ function checkWinCondition() {
 
 function updateMoveCounter() {
     document.getElementById('move-counter').innerText = `Moves: ${moveCounter}`;
+    document.getElementById('move-limit').innerText = `Move Limit: ${moveLimit}`;
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        timeElapsed++;
+        document.getElementById('timer').innerText = `Time: ${timeElapsed}s`;
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timer);
 }
 
 function resetGame() {
-    gameContainer.innerHTML = '';
-    containers.length = 0;
-    history.length = 0;
-    moveCounter = 0;
     setupGame();
 }
 
@@ -111,7 +142,20 @@ function undoMove() {
     }
 }
 
+function changePalette() {
+    const palette = document.getElementById('color-select').value;
+    colors = colorPalettes[palette];
+    resetGame();
+}
+
+function giveHint() {
+    // Implement a basic hint system (e.g., highlight a potential move)
+    alert('Hint functionality not yet implemented.');
+}
+
 document.getElementById('reset-btn').addEventListener('click', resetGame);
 document.getElementById('undo-btn').addEventListener('click', undoMove);
+document.getElementById('color-select').addEventListener('change', changePalette);
+document.getElementById('hint-btn').addEventListener('click', giveHint);
 
 setupGame();

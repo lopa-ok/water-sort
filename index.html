@@ -11,6 +11,25 @@
         <button id="reset-btn">Reset</button>
         <button id="undo-btn">Undo</button>
         <div id="move-counter">Moves: 0</div>
+        <div id="move-limit">Move Limit: 20</div>
+        <div id="difficulty">
+            <label for="difficulty-select">Difficulty:</label>
+            <select id="difficulty-select">
+                <option value="1">Easy</option>
+                <option value="2">Medium</option>
+                <option value="3">Hard</option>
+            </select>
+        </div>
+        <div id="color-palette">
+            <label for="color-select">Colors:</label>
+            <select id="color-select">
+                <option value="default">Default</option>
+                <option value="pastel">Pastel</option>
+                <option value="vibrant">Vibrant</option>
+            </select>
+        </div>
+        <button id="hint-btn">Hint</button>
+        <div id="timer">Time: 0s</div>
     </div>
     <div id="game-container">
         <div class="container" data-index="0"></div>
