@@ -4,6 +4,8 @@ const liquidCount = 3;
 
 const gameContainer = document.getElementById('game-container');
 const containers = [];
+const history = [];
+let moveCounter = 0;
 
 function createContainer(index) {
     const container = document.createElement('div');
@@ -26,6 +28,7 @@ function setupGame() {
         gameContainer.appendChild(container);
         containers.push(container);
     }
+    updateMoveCounter();
 }
 
 function handleContainerClick(event) {
@@ -54,8 +57,11 @@ function getTopLiquid(container) {
 function moveLiquid(source, target) {
     const liquid = getTopLiquid(source);
     if (liquid && target.children.length < liquidCount) {
+        history.push({ source: source.dataset.index, target: target.dataset.index, liquid: liquid.style.backgroundColor });
         target.appendChild(liquid);
         delete source.dataset.target;
+        moveCounter++;
+        updateMoveCounter();
         checkWinCondition();
     }
 }
@@ -73,10 +79,39 @@ function checkWinCondition() {
     for (const container of containers) {
         const colors = Array.from(container.querySelectorAll('div')).map(div => div.style.backgroundColor);
         if (colors.every(color => color === colors[0])) {
-            alert('You Win!');
+            setTimeout(() => alert('You Win!'), 100);
             break;
         }
     }
 }
+
+function updateMoveCounter() {
+    document.getElementById('move-counter').innerText = `Moves: ${moveCounter}`;
+}
+
+function resetGame() {
+    gameContainer.innerHTML = '';
+    containers.length = 0;
+    history.length = 0;
+    moveCounter = 0;
+    setupGame();
+}
+
+function undoMove() {
+    const lastMove = history.pop();
+    if (lastMove) {
+        const sourceContainer = containers[lastMove.source];
+        const targetContainer = containers[lastMove.target];
+        const liquid = getTopLiquid(targetContainer);
+        if (liquid && liquid.style.backgroundColor === lastMove.liquid) {
+            sourceContainer.appendChild(liquid);
+            moveCounter--;
+            updateMoveCounter();
+        }
+    }
+}
+
+document.getElementById('reset-btn').addEventListener('click', resetGame);
+document.getElementById('undo-btn').addEventListener('click', undoMove);
 
 setupGame();
